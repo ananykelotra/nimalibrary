@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Discussion Room</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+
+    <div class="main-wrapper">
+        <div class="container">
+            <div class="header-section">
+                <h1><i class="fa-solid fa-book-open-reader"></i> Discussion Deck</h1>
+                <p class="subtitle">Reserve your collaborative space.</p>
+            </div>
+
+            <div class="card">
+                <h3><i class="fa-solid fa-users-rectangle"></i> Group Details</h3>
+                <form id="bookingForm">
+                    <div class="input-group">
+                        <i class="fa-solid fa-user-tie input-icon"></i>
+                        <input type="text" id="leaderName" placeholder="Leader Name" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-id-card input-icon"></i>
+                        <input type="text" id="rollNo" placeholder="Roll No (e.g. 21BCE001)" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-people-group input-icon"></i>
+                        <select id="groupSize" required>
+                            <option value="" disabled selected>Select Group Size</option>
+                            <option value="3">3 Students</option>
+                            <option value="4">4 Students</option>
+                            <option value="5">5 Students</option>
+                            <option value="6">6 Students</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-header-flex">
+                     <h3><i class="fa-regular fa-clock"></i> Available Slots (Today)</h3>
+                     <div class="status-legend">
+                        <span><i class="fa-solid fa-circle dot-free"></i> Available</span>
+                        <span><i class="fa-solid fa-circle dot-booked"></i> Booked</span>
+                    </div>
+                </div>
+               
+                
+                <div class="slot-grid">
+                    <button class="slot-btn free" onclick="selectSlot('9-10')">
+                        <span class="time">09:00</span> <span class="period">AM</span>
+                    </button>
+                    <button class="slot-btn free" onclick="selectSlot('10-11')">
+                        <span class="time">10:00</span> <span class="period">AM</span>
+                    </button>
+                    <button class="slot-btn booked" disabled>
+                        <span class="time">11:00</span> <span class="period">AM</span>
+                        <span class="booked-label">Taken</span>
+                    </button>
+                    <button class="slot-btn free" onclick="selectSlot('12-1')">
+                        <span class="time">12:00</span> <span class="period">PM</span>
+                    </button>
+                    <button class="slot-btn free" onclick="selectSlot('1-2')">
+                        <span class="time">01:00</span> <span class="period">PM</span>
+                    </button>
+                    <button class="slot-btn free" onclick="selectSlot('2-3')">
+                        <span class="time">02:00</span> <span class="period">PM</span>
+                    </button>
+                </div>
+            </div>
+
+            <button id="confirmBtn" class="main-btn" onclick="bookRoom()">
+                Confirm Reservation <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let selectedSlot = null;
+        function selectSlot(time) {
+            document.querySelectorAll('.slot-btn').forEach(btn => btn.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+            selectedSlot = time;
+        }
+        function bookRoom() {
+            if(!selectedSlot) { alert("Please select a time slot first."); return; }
+            alert("Connecting to Python backend to book: " + selectedSlot);
+        }
+    </script>
+
+</body>
+</html>
