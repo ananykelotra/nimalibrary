@@ -221,3 +221,31 @@ input:focus, select:focus {
     box-shadow: 0 15px 30px -10px rgba(30, 42, 74, 0.6);
 }
 .main-btn:active { transform: scale(0.98); }
+.room-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.room-btn {
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  background: #e8f5e9;
+  cursor: pointer;
+}
+
+.room-booked {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.room-btn.selected {
+  background: #4caf50;
+  color: white;
+}
+.member-input-block {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
