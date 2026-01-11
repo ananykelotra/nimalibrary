@@ -1,0 +1,18 @@
+# --- Security (VERY IMPORTANT) ---
+# Ignores the Firebase Secret Key so it never goes to GitHub
+serviceAccountKey.json
+*.json  # Optional: Ignores all JSON files if you want to be extra safe
+
+# --- Python & Virtual Environment ---
+# Ignores the massive venv folder (your teammate creates their own)
+venv/
+env/
+__pycache__/
+*.pyc
+
+# --- OS Junk Files ---
+.DS_Store
+Thumbs.db
+
+# --- VS Code Settings ---
+.vscode/
