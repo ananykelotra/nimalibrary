@@ -1,12 +1,17 @@
 import firebase_admin
 from firebase_admin import credentials, firestore
+import os
 
-# 1. Connect to Firebase using the key you already have
-cred = credentials.Certificate("serviceAccountKey.json")
+# Check if we are on Render (Cloud) or Local (Laptop)
+if os.path.exists("/etc/secrets/serviceAccountKey.json"):
+    # We are on the server! Use the secret vault path
+    cred = credentials.Certificate("/etc/secrets/serviceAccountKey.json")
+else:
+    # We are on the laptop! Use the local file
+    cred = credentials.Certificate("serviceAccountKey.json")
 
-# 2. Check if app is already running
+# Initialize only if not already running
 if not firebase_admin._apps:
     firebase_admin.initialize_app(cred)
 
-# 3. Create the database client
 db = firestore.client()
