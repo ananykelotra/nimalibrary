@@ -135,54 +135,50 @@ function selectRoom(btn, room) {
 
 /* ---------------- FINAL SUBMIT ---------------- */
 async function bookRoom() {
-    if (!selectedSlot || !selectedRoom) {
-        alert("Please select date, time slot and room");
-        return;
-    }
+  // ---- validations ----
+  if (!selectedSlot || !selectedRoom) {
+    alert("Please select both time slot and room.");
+    return;
+  }
 
-    // Collect group members
-    const memberNames = [];
-    document.querySelectorAll("[name^='memberName']").forEach(input => {
-        memberNames.push(input.value);
+  const data = {
+    leader_name: document.getElementById("leaderName").value,
+    leader_roll_no: document.getElementById("rollNo").value,
+    email: document.getElementById("email").value,
+    contact: document.getElementById("contactNo").value,
+    group_members: getGroupMembers(), // helper function
+    institute: document.getElementById("institute").value,
+    department: document.getElementById("department").value,
+    program: document.getElementById("programme").value,
+    purpose: document.getElementById("purpose").value,
+    room_id: selectedRoom,
+    date: document.getElementById("bookingDate").value,
+    time_slot: selectedSlot
+  };
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/confirm-booking`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
     });
 
-    const bookingData = {
-        leader_name: leaderName.value,
-        leader_roll_no: rollNo.value,
-        email: email.value,
-        contact: contactNo.value,
-        group_members: memberNames.join(", "),
-        institute: institute.value,
-        department: department.value,
-        program: programme.value,
-        purpose: purpose.value,
-        room_id: selectedRoom,
-        date: bookingDate.value,
-        time_slot: selectedSlot
-    };
+    const result = await res.json();
 
-    try {
-        const res = await fetch(`${BACKEND_URL}/confirm-booking`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(bookingData)
-        });
-
-        const data = await res.json();
-
-        if (data.status === "success") {
-            alert("Booking Confirmed! ");
-            // optional: window.location.href = "success.html";
-        } else {
-            alert(data.message);
-        }
-    } catch (err) {
-        alert("Server error. Try again.");
-        console.error(err);
+    if (result.status === "success") {
+      alert("🎉 Booking Confirmed!");
+      window.location.reload();
+    } else {
+      alert(result.message);
     }
+  } catch (err) {
+    console.error(err);
+    alert("Server error. Please try again.");
+  }
 }
+
 
 const groupSizeSelect = document.getElementById("groupSize");
 const groupMembersContainer = document.getElementById("groupMembersContainer");
