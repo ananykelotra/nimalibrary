@@ -1,11 +1,30 @@
 let selectedSlot = null;
 let selectedRoom = null;
+const BACKEND_URL = "https://nimalibrary.onrender.com";
 
 /* ---------------- GROUP SIZE LOGIC ---------------- */
 const groupSize = document.getElementById("groupSize");
+const groupMembersDiv = document.getElementById("groupMembers");
+
 groupSize.addEventListener("change", () => {
+    const size = parseInt(groupSize.value);
+    groupMembersDiv.innerHTML = "";
+
+    // Unlock leader fields
     document.getElementById("leaderName").disabled = false;
     document.getElementById("rollNo").disabled = false;
+    document.getElementById("email").disabled = false;
+    document.getElementById("contactNo").disabled = false;
+
+    // Generate member inputs
+    for (let i = 1; i <= size; i++) {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.placeholder = `Member ${i} Name`;
+        input.name = `memberName${i}`;
+        input.required = true;
+        groupMembersDiv.appendChild(input);
+    }
 });
 
 /* ---------------- DATE LOGIC ---------------- */
@@ -17,30 +36,53 @@ maxDate.setDate(today.getDate() + 7);
 bookingDate.min = today.toISOString().split("T")[0];
 bookingDate.max = maxDate.toISOString().split("T")[0];
 bookingDate.value = bookingDate.min;
+bookingDate.addEventListener("change", generateTimeSlots);
 
 /* ---------------- TIME SLOT LOGIC ---------------- */
 const slotGrid = document.getElementById("slotGrid");
 
-function generateTimeSlots() {
+async function generateTimeSlots() {
     slotGrid.innerHTML = "";
     selectedSlot = null;
+
+    const bookedSlots = await fetchBookedSlots(bookingDate.value);
 
     const now = new Date();
     let startHour = now.getHours() + 1;
 
     if (bookingDate.value !== bookingDate.min) {
-        startHour = 9; // full day if future date
+        startHour = 9;
     }
 
     for (let hour = startHour; hour < 18; hour++) {
+        const slot = `${hour}:00-${hour + 1}:00`;
         const btn = document.createElement("button");
-        btn.className = "slot-btn free";
-        btn.innerText = `${hour}:00 - ${hour + 1}:00`;
 
-        btn.onclick = () => selectSlot(btn, `${hour}-${hour + 1}`);
+        btn.innerText = slot;
+        btn.classList.add("slot-btn");
+
+        if (bookedSlots.includes(slot)) {
+            btn.classList.add("booked");
+            btn.disabled = true;
+        } else {
+            btn.classList.add("free");
+            btn.onclick = () => selectSlot(btn, slot);
+        }
+
         slotGrid.appendChild(btn);
     }
 }
+async function fetchBookedSlots(date) {
+    try {
+        const res = await fetch(`${BACKEND_URL}/get-bookings?date=${date}`);
+        const data = await res.json();
+        return data.booked_slots || [];
+    } catch (err) {
+        console.error("Error fetching slots", err);
+        return [];
+    }
+}
+
 
 bookingDate.addEventListener("change", generateTimeSlots);
 
@@ -92,23 +134,56 @@ function selectRoom(btn, room) {
 }
 
 /* ---------------- FINAL SUBMIT ---------------- */
-function bookRoom() {
+async function bookRoom() {
     if (!selectedSlot || !selectedRoom) {
         alert("Please select date, time slot and room");
         return;
     }
 
+    // Collect group members
+    const memberNames = [];
+    document.querySelectorAll("[name^='memberName']").forEach(input => {
+        memberNames.push(input.value);
+    });
+
     const bookingData = {
-        leaderName: leaderName.value,
-        rollNo: rollNo.value,
+        leader_name: leaderName.value,
+        leader_roll_no: rollNo.value,
+        email: email.value,
+        contact: contactNo.value,
+        group_members: memberNames.join(", "),
+        institute: institute.value,
+        department: department.value,
+        program: programme.value,
+        purpose: purpose.value,
+        room_id: selectedRoom,
         date: bookingDate.value,
-        timeSlot: selectedSlot,
-        room: selectedRoom
+        time_slot: selectedSlot
     };
 
-    console.log("Booking Ready:", bookingData);
-    alert("Frontend logic complete. Ready for Firebase");
+    try {
+        const res = await fetch(`${BACKEND_URL}/confirm-booking`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(bookingData)
+        });
+
+        const data = await res.json();
+
+        if (data.status === "success") {
+            alert("Booking Confirmed! ");
+            // optional: window.location.href = "success.html";
+        } else {
+            alert(data.message);
+        }
+    } catch (err) {
+        alert("Server error. Try again.");
+        console.error(err);
+    }
 }
+
 const groupSizeSelect = document.getElementById("groupSize");
 const groupMembersContainer = document.getElementById("groupMembersContainer");
 
