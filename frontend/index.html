@@ -5,25 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Discussion Deck | Library Booking</title>
 
-    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 <div class="main-wrapper">
 <div class="container">
 
-    <!-- HEADER -->
     <div class="header-section">
         <h1><i class="fa-solid fa-book-open-reader"></i> Discussion Deck</h1>
         <p class="subtitle">Reserve your collaborative space</p>
     </div>
 
-    <!-- GROUP DETAILS -->
     <div class="card">
         <h3><i class="fa-solid fa-users"></i> Group Details</h3>
 
@@ -53,7 +49,6 @@
         </form>
     </div>
 
-    <!-- GROUP MEMBERS -->
     <div class="card">
         <h3><i class="fa-solid fa-users-rectangle"></i> Group Members</h3>
         <div id="groupMembersContainer">
@@ -61,7 +56,6 @@
         </div>
     </div>
 
-    <!-- ACADEMIC & CONTACT DETAILS -->
     <div class="card">
         <h3><i class="fa-solid fa-graduation-cap"></i> Academic & Contact Details</h3>
 
@@ -91,32 +85,29 @@
         </div>
     </div>
 
-    <!-- TIME SLOTS -->
     <div class="card">
+        <h3><i class="fa-solid fa-calendar-day"></i> Select Date & Time</h3>
+        
+        <div class="input-group">
+            <i class="fa-solid fa-calendar-days input-icon"></i>
+            <input type="date" id="bookingDate" required>
+        </div>
+
         <div class="card-header-flex">
-            <h3><i class="fa-regular fa-clock"></i> Available Slots (Today)</h3>
+            <h4><i class="fa-solid fa-door-open"></i> Available Rooms</h4>
+        </div>
+        <div class="room-grid" id="roomGrid"></div>
+
+        <div class="card-header-flex" style="margin-top: 20px;">
+            <h4><i class="fa-regular fa-clock"></i> Available Slots</h4>
             <div class="status-legend">
                 <span><i class="fa-solid fa-circle dot-free"></i> Available</span>
                 <span><i class="fa-solid fa-circle dot-booked"></i> Booked</span>
             </div>
         </div>
-
         <div class="slot-grid" id="slotGrid"></div>
-    </div>
 
-    <!-- BOOKING DETAILS -->
-    <div class="card">
-        <h3><i class="fa-solid fa-clipboard-question"></i> Booking Details</h3>
-
-        <div class="input-group">
-            <i class="fa-solid fa-calendar-day input-icon"></i>
-            <input type="date" id="bookingDate" required>
-        </div>
-        <div class="card"><h3><i class="fa-solid fa-door-open"></i> Available Rooms</h3>
-            <div class="room-grid" id="roomGrid"></div>
-        </div>
-
-        <div class="input-group">
+        <div class="input-group" style="margin-top: 20px;">
             <i class="fa-solid fa-bullseye input-icon"></i>
             <select id="purpose" required>
                 <option value="" disabled selected>Select Purpose</option>
@@ -127,12 +118,14 @@
             </select>
         </div>
     </div>
+
     <button id="confirmBtn" class="main-btn" onclick="bookRoom()">
         Confirm Reservation <i class="fa-solid fa-arrow-right"></i>
     </button>
 
 </div>
 </div>
-<script src="static/main.js"></script>
+
+<script src="main.js"></script>
 </body>
 </html>
