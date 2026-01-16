@@ -1,6 +1,6 @@
 let selectedSlot = null;
 let selectedRoom = null;
-const BACKEND_URL = "https://nimalibrary.onrender.com";
+const BACKEND_URL = "https://nima-backend.vercel.app";
 
 /* ---------------- GROUP SIZE LOGIC ---------------- */
 const groupSize = document.getElementById("groupSize");
