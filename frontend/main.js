@@ -1,31 +1,8 @@
 let selectedSlot = null;
 let selectedRoom = null;
-const BACKEND_URL = "https://nima-backend.vercel.app";
 
-/* ---------------- GROUP SIZE LOGIC ---------------- */
-const groupSize = document.getElementById("groupSize");
-const groupMembersDiv = document.getElementById("groupMembers");
-
-groupSize.addEventListener("change", () => {
-    const size = parseInt(groupSize.value);
-    groupMembersDiv.innerHTML = "";
-
-    // Unlock leader fields
-    document.getElementById("leaderName").disabled = false;
-    document.getElementById("rollNo").disabled = false;
-    document.getElementById("email").disabled = false;
-    document.getElementById("contactNo").disabled = false;
-
-    // Generate member inputs
-    for (let i = 1; i <= size; i++) {
-        const input = document.createElement("input");
-        input.type = "text";
-        input.placeholder = `Member ${i} Name`;
-        input.name = `memberName${i}`;
-        input.required = true;
-        groupMembersDiv.appendChild(input);
-    }
-});
+// ✅ CONFIRM THIS IS YOUR VERCEL BACKEND URL
+const BACKEND_URL = "https://nima-backend.vercel.app"; 
 
 /* ---------------- DATE LOGIC ---------------- */
 const bookingDate = document.getElementById("bookingDate");
@@ -33,6 +10,7 @@ const today = new Date();
 const maxDate = new Date();
 maxDate.setDate(today.getDate() + 7);
 
+// Set Min and Max dates
 bookingDate.min = today.toISOString().split("T")[0];
 bookingDate.max = maxDate.toISOString().split("T")[0];
 bookingDate.value = bookingDate.min;
@@ -48,10 +26,14 @@ async function generateTimeSlots() {
     const bookedSlots = await fetchBookedSlots(bookingDate.value);
 
     const now = new Date();
-    let startHour = now.getHours() + 1;
+    let startHour = 9; // Library opens at 9 AM
 
-    if (bookingDate.value !== bookingDate.min) {
-        startHour = 9;
+    // If looking at today, only show future slots
+    if (bookingDate.value === now.toISOString().split("T")[0]) {
+        const currentHour = now.getHours();
+        if (currentHour >= 9) {
+            startHour = currentHour + 1;
+        }
     }
 
     for (let hour = startHour; hour < 18; hour++) {
@@ -72,6 +54,7 @@ async function generateTimeSlots() {
         slotGrid.appendChild(btn);
     }
 }
+
 async function fetchBookedSlots(date) {
     try {
         const res = await fetch(`${BACKEND_URL}/get-bookings?date=${date}`);
@@ -83,8 +66,8 @@ async function fetchBookedSlots(date) {
     }
 }
 
-
-bookingDate.addEventListener("change", generateTimeSlots);
+// Initialize slots on load
+generateTimeSlots();
 
 /* ---------------- SLOT SELECTION ---------------- */
 function selectSlot(btn, time) {
@@ -97,32 +80,22 @@ function selectSlot(btn, time) {
 /* ---------------- ROOM LOGIC ---------------- */
 const roomGrid = document.getElementById("roomGrid");
 
-// MOCK occupied rooms (Firebase later)
-const occupiedRooms = {
-    "2026-01-06_16-17": ["Room A"],
-    "2026-01-06_17-18": ["Room B"]
-};
-
 function loadRooms() {
     roomGrid.innerHTML = "";
     selectedRoom = null;
 
     const rooms = ["Room A", "Room B", "Room C", "Room D"];
-    const key = `${bookingDate.value}_${selectedSlot}`;
-    const blocked = occupiedRooms[key] || [];
-
+    
+    // In a real app, you would fetch occupied rooms from backend too.
+    // For now, we assume all rooms are open if the slot is free.
+    
     rooms.forEach(room => {
         const btn = document.createElement("button");
         btn.className = "room-btn";
         btn.innerText = room;
 
-        if (blocked.includes(room)) {
-            btn.classList.add("room-booked");
-            btn.disabled = true;
-        } else {
-            btn.onclick = () => selectRoom(btn, room);
-        }
-
+        btn.onclick = () => selectRoom(btn, room);
+        
         roomGrid.appendChild(btn);
     });
 }
@@ -133,53 +106,7 @@ function selectRoom(btn, room) {
     selectedRoom = room;
 }
 
-/* ---------------- FINAL SUBMIT ---------------- */
-async function bookRoom() {
-  // ---- validations ----
-  if (!selectedSlot || !selectedRoom) {
-    alert("Please select both time slot and room.");
-    return;
-  }
-
-  const data = {
-    leader_name: document.getElementById("leaderName").value,
-    leader_roll_no: document.getElementById("rollNo").value,
-    email: document.getElementById("email").value,
-    contact: document.getElementById("contactNo").value,
-    group_members: getGroupMembers(), // helper function
-    institute: document.getElementById("institute").value,
-    department: document.getElementById("department").value,
-    program: document.getElementById("programme").value,
-    purpose: document.getElementById("purpose").value,
-    room_id: selectedRoom,
-    date: document.getElementById("bookingDate").value,
-    time_slot: selectedSlot
-  };
-
-  try {
-    const res = await fetch(`${BACKEND_URL}/confirm-booking`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(data)
-    });
-
-    const result = await res.json();
-
-    if (result.status === "success") {
-      alert("🎉 Booking Confirmed!");
-      window.location.reload();
-    } else {
-      alert(result.message);
-    }
-  } catch (err) {
-    console.error(err);
-    alert("Server error. Please try again.");
-  }
-}
-
-
+/* ---------------- GROUP SIZE LOGIC (Fixed) ---------------- */
 const groupSizeSelect = document.getElementById("groupSize");
 const groupMembersContainer = document.getElementById("groupMembersContainer");
 
@@ -195,19 +122,20 @@ groupSizeSelect.addEventListener("change", () => {
     }
 
     for (let i = 1; i <= size; i++) {
-        // Create member input block
         const memberDiv = document.createElement("div");
         memberDiv.className = "member-input-block";
+        // Simple styling for spacing
+        memberDiv.style.marginTop = "10px"; 
 
         memberDiv.innerHTML = `
-            <h4>Member ${i}</h4>
+            <h4 style="font-size: 14px; margin-bottom:5px;">Member ${i}</h4>
             <div class="input-group">
                 <i class="fa-solid fa-user input-icon"></i>
-                <input type="text" name="memberName${i}" placeholder="Member ${i} Name" required>
+                <input type="text" class="member-name" placeholder="Name" required style="margin-bottom: 5px;">
             </div>
             <div class="input-group">
                 <i class="fa-solid fa-id-card input-icon"></i>
-                <input type="text" name="memberRollNo${i}" placeholder="Member ${i} Roll No" required>
+                <input type="text" class="member-roll" placeholder="Roll No" required>
             </div>
         `;
 
@@ -215,3 +143,69 @@ groupSizeSelect.addEventListener("change", () => {
     }
 });
 
+/* ---------------- HELPER: GET MEMBERS (Added This!) ---------------- */
+function getGroupMembers() {
+    const members = [];
+    // We grab all inputs with class 'member-name'
+    const nameInputs = document.querySelectorAll('.member-name');
+    const rollInputs = document.querySelectorAll('.member-roll');
+
+    nameInputs.forEach((input, index) => {
+        const name = input.value.trim();
+        const roll = rollInputs[index] ? rollInputs[index].value.trim() : "";
+        
+        if (name) {
+            members.push({ name: name, roll_no: roll });
+        }
+    });
+    
+    return members;
+}
+
+/* ---------------- FINAL SUBMIT ---------------- */
+async function bookRoom() {
+  // 1. Validation
+  if (!selectedSlot || !selectedRoom) {
+    alert("Please select both a time slot and a room.");
+    return;
+  }
+
+  // 2. Prepare Data
+  const data = {
+    leader_name: document.getElementById("leaderName").value,
+    leader_roll_no: document.getElementById("rollNo").value,
+    email: document.getElementById("email").value,
+    contact: document.getElementById("contactNo").value,
+    group_members: getGroupMembers(), // ✅ Now this function exists!
+    institute: document.getElementById("institute").value,
+    department: document.getElementById("department").value,
+    program: document.getElementById("programme").value,
+    purpose: document.getElementById("purpose").value,
+    room_id: selectedRoom,
+    date: document.getElementById("bookingDate").value,
+    time_slot: selectedSlot
+  };
+
+  // 3. Send to Backend
+  try {
+    const res = await fetch(`${BACKEND_URL}/confirm-booking`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+
+    if (result.status === "success") {
+      alert("🎉 Booking Confirmed!");
+      window.location.reload();
+    } else {
+      alert("Error: " + result.message);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Server error. Please try again.");
+  }
+}
