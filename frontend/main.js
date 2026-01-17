@@ -1,8 +1,15 @@
 let selectedSlot = null;
-let selectedRoom = null;
 
 // ✅ CONFIRM THIS IS YOUR VERCEL BACKEND URL
 const BACKEND_URL = "https://nima-backend.vercel.app"; 
+const roomsByFloor = {
+  "5th Floor": ["D501", "D502", "D503", "D504", "D505", "D506", "D507"],
+  "6th Floor": ["D601", "D602"],
+  "7th Floor": ["D701", "D702"],
+  "8th Floor": ["D801", "D802"]
+};
+
+let selectedRoom = null;
 
 /* ---------------- DATE LOGIC ---------------- */
 const bookingDate = document.getElementById("bookingDate");
@@ -70,41 +77,55 @@ async function fetchBookedSlots(date) {
 generateTimeSlots();
 
 /* ---------------- SLOT SELECTION ---------------- */
-function selectSlot(btn, time) {
-    document.querySelectorAll(".slot-btn").forEach(b => b.classList.remove("selected"));
-    btn.classList.add("selected");
-    selectedSlot = time;
-    loadRooms();
+function selectSlot(slot) {
+  selectedSlot = slot;
+
+  // frontend-only assumption: all rooms free
+  const allRooms = Object.values(roomsByFloor).flat();
+  renderRooms(allRooms);
 }
 
 /* ---------------- ROOM LOGIC ---------------- */
 const roomGrid = document.getElementById("roomGrid");
 
-function loadRooms() {
-    roomGrid.innerHTML = "";
-    selectedRoom = null;
+function renderRooms(availableRooms) {
+  const grid = document.getElementById("roomGrid");
+  grid.innerHTML = "";
 
-    const rooms = ["Room A", "Room B", "Room C", "Room D"];
-    
-    // In a real app, you would fetch occupied rooms from backend too.
-    // For now, we assume all rooms are open if the slot is free.
-    
+  Object.entries(roomsByFloor).forEach(([floor, rooms]) => {
+    const floorTitle = document.createElement("h5");
+    floorTitle.className = "floor-title";
+    floorTitle.innerText = floor;
+
+    grid.appendChild(floorTitle);
+
     rooms.forEach(room => {
-        const btn = document.createElement("button");
-        btn.className = "room-btn";
-        btn.innerText = room;
+      const btn = document.createElement("button");
+      btn.className = "room-btn";
+      btn.innerText = room;
 
-        btn.onclick = () => selectRoom(btn, room);
-        
-        roomGrid.appendChild(btn);
+      if (!availableRooms.includes(room)) {
+        btn.classList.add("booked");
+        btn.disabled = true;
+      } else {
+        btn.onclick = () => selectRoom(room, btn);
+      }
+
+      grid.appendChild(btn);
     });
+  });
 }
 
-function selectRoom(btn, room) {
-    document.querySelectorAll(".room-btn").forEach(b => b.classList.remove("selected"));
-    btn.classList.add("selected");
-    selectedRoom = room;
+function selectRoom(room, btn) {
+  document.querySelectorAll(".room-btn").forEach(b =>
+    b.classList.remove("selected")
+  );
+
+  btn.classList.add("selected");
+  selectedRoom = room;
 }
+
+
 
 /* ---------------- GROUP SIZE LOGIC (Fixed) ---------------- */
 const groupSizeSelect = document.getElementById("groupSize");
@@ -163,20 +184,18 @@ function getGroupMembers() {
 }
 
 /* ---------------- FINAL SUBMIT ---------------- */
-async function bookRoom() {
-  // 1. Validation
+function bookRoom() {
   if (!selectedSlot || !selectedRoom) {
-    alert("Please select both a time slot and a room.");
+    alert("Please select date, time slot and room");
     return;
   }
 
-  // 2. Prepare Data
-  const data = {
+  const bookingData = {
     leader_name: document.getElementById("leaderName").value,
     leader_roll_no: document.getElementById("rollNo").value,
     email: document.getElementById("email").value,
     contact: document.getElementById("contactNo").value,
-    group_members: getGroupMembers(), // ✅ Now this function exists!
+    group_members: "Temporary", // you can refine later
     institute: document.getElementById("institute").value,
     department: document.getElementById("department").value,
     program: document.getElementById("programme").value,
@@ -186,26 +205,9 @@ async function bookRoom() {
     time_slot: selectedSlot
   };
 
-  // 3. Send to Backend
-  try {
-    const res = await fetch(`${BACKEND_URL}/confirm-booking`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(data)
-    });
+  // TEMP: store locally for success page
+  localStorage.setItem("bookingData", JSON.stringify(bookingData));
 
-    const result = await res.json();
-
-    if (result.status === "success") {
-      alert("🎉 Booking Confirmed!");
-      window.location.reload();
-    } else {
-      alert("Error: " + result.message);
-    }
-  } catch (err) {
-    console.error(err);
-    alert("Server error. Please try again.");
-  }
+  // ✅ THIS IS THE MISSING PART
+  window.location.href = "/frontend/success.html";
 }
