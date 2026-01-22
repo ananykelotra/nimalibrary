@@ -5,15 +5,26 @@ let currentDayBookings = [];
 // ✅ VERIFY THIS IS YOUR VERCEL BACKEND URL
 const BACKEND_URL = "https://nima-backend.vercel.app"; 
 
-/* ---------------- DATE LOGIC ---------------- */
+/* ---------------- DATE LOGIC (FIXED) ---------------- */
 const bookingDate = document.getElementById("bookingDate");
+
+// Function to get YYYY-MM-DD in Local Time (not UTC)
+function getLocalDateString(date) {
+    const offset = date.getTimezoneOffset() * 60000;
+    const localDate = new Date(date.getTime() - offset);
+    return localDate.toISOString().split("T")[0];
+}
+
 const today = new Date();
 const maxDate = new Date();
-maxDate.setDate(today.getDate() + 7);
+maxDate.setDate(today.getDate() + 7); // Exactly 7 days from now
 
-bookingDate.min = today.toISOString().split("T")[0];
-bookingDate.max = maxDate.toISOString().split("T")[0];
-bookingDate.value = bookingDate.min;
+// Set the input limits
+bookingDate.min = getLocalDateString(today);
+bookingDate.max = getLocalDateString(maxDate);
+bookingDate.value = bookingDate.min; // Default to today
+
+// Listen for changes
 bookingDate.addEventListener("change", generateTimeSlots);
 
 /* ---------------- TIME SLOT LOGIC ---------------- */
@@ -25,19 +36,29 @@ async function generateTimeSlots() {
     selectedRoom = null;
     document.getElementById("roomGrid").innerHTML = '<p class="subtitle">Select a time slot first</p>';
 
+    // 1. Fetch data from backend
     currentDayBookings = await fetchBookedSlots(bookingDate.value);
     
-    slotGrid.innerHTML = ""; 
+    slotGrid.innerHTML = ""; // Clear loading message
 
     const now = new Date();
-    let startHour = 9; 
+    let startHour = 9; // Library opens at 9 AM
 
-    if (bookingDate.value === now.toISOString().split("T")[0]) {
-        if (now.getHours() >= 9) {
-            startHour = now.getHours() + 1;
+    // Check if user selected Today
+    if (bookingDate.value === getLocalDateString(now)) {
+        const currentHour = now.getHours();
+        if (currentHour >= 9) {
+            startHour = currentHour + 1; // Start from next hour
         }
     }
 
+    // 2. Logic: If it is past 6 PM (18:00), show "Closed" message
+    if (startHour >= 18) {
+        slotGrid.innerHTML = '<p style="color: red; font-weight: 500;">Library is closed for today. Please check tomorrow!</p>';
+        return;
+    }
+
+    // 3. Generate Buttons
     for (let hour = startHour; hour < 18; hour++) {
         const slot = `${hour}:00-${hour + 1}:00`;
         const btn = document.createElement("button");
@@ -45,12 +66,14 @@ async function generateTimeSlots() {
         btn.classList.add("slot-btn");
         btn.classList.add("free"); 
 
-        // Check if ALL 4 rooms are booked for this slot
+        // Check if ALL 4 rooms are booked
         const bookingsForThisSlot = currentDayBookings.filter(b => b.time_slot === slot);
+        
         if (bookingsForThisSlot.length >= 4) {
             btn.classList.remove("free");
             btn.classList.add("booked");
             btn.disabled = true;
+            btn.title = "All rooms booked";
         } else {
             btn.onclick = () => selectSlot(btn, slot);
         }
@@ -66,11 +89,12 @@ async function fetchBookedSlots(date) {
         return data.bookings || []; 
     } catch (err) {
         console.error("Error fetching slots", err);
+        slotGrid.innerHTML = '<p style="color:red;">Error connecting to server.</p>';
         return [];
     }
 }
 
-// Initialize
+// Run once on load
 generateTimeSlots();
 
 /* ---------------- SLOT SELECTION ---------------- */
@@ -102,7 +126,7 @@ function loadRooms(timeSlot) {
         if (takenRooms.includes(room)) {
             btn.classList.add("room-booked"); 
             btn.disabled = true;
-            btn.title = "Already booked for this time";
+            btn.innerText += " (Booked)";
         } else {
             btn.onclick = () => selectRoom(btn, room);
         }
