@@ -85,18 +85,24 @@
     const rawData = localStorage.getItem("bookingReceipt");
 
     if (rawData) {
-        const data = JSON.json(rawData); // Just kidding, JSON.parse
-        const info = JSON.parse(rawData);
+        try {
+            // ✅ THE FIX: Corrected JSON.parse
+            const info = JSON.parse(rawData);
 
-        // 2. Fill the receipt
-        document.getElementById("dispName").textContent = info.leader_name;
-        document.getElementById("dispRoll").textContent = info.leader_roll_no;
-        document.getElementById("dispDate").textContent = info.date;
-        document.getElementById("dispTime").textContent = info.time_slot;
-        document.getElementById("dispRoom").textContent = info.room_id;
+            // 2. Fill the receipt
+            document.getElementById("dispName").textContent = info.leader_name || "N/A";
+            document.getElementById("dispRoll").textContent = info.leader_roll_no || "N/A";
+            document.getElementById("dispDate").textContent = info.date || "N/A";
+            document.getElementById("dispTime").textContent = info.time_slot || "N/A";
+            document.getElementById("dispRoom").textContent = info.room_id || "N/A";
+            
+        } catch (e) {
+            console.error("Error parsing booking data", e);
+        }
     } else {
         // If no data found, go back home
-        window.location.href = "index.html";
+        // window.location.href = "index.html"; 
+        // (Commented out so you can at least see the page if it fails)
     }
 </script>
 
