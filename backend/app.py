@@ -64,11 +64,19 @@ def get_bookings():
     try:
         date = request.args.get('date')
         if not date:
-            return jsonify({"booked_slots": []})
+            return jsonify({"bookings": []})
             
-        # This query works now because we saved 'date' at the root level
+        # Return BOTH time and room so frontend can filter correctly
         docs = db.collection('daily_slots').where('date', '==', date).stream()
-        return jsonify({"booked_slots": [doc.to_dict().get('time_slot') for doc in docs]})
+        bookings = []
+        for doc in docs:
+            data = doc.to_dict()
+            bookings.append({
+                "time_slot": data.get('time_slot'),
+                "room_id": data.get('room_id')
+            })
+            
+        return jsonify({"bookings": bookings}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 400
 
