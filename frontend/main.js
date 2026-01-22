@@ -1,8 +1,19 @@
 let selectedSlot = null;
+<<<<<<< HEAD
 let selectedRoom = null;
 let currentDayBookings = []; // Store the full booking data here
+=======
+>>>>>>> 39be6ad9c3b52f08b26274a451cd3aa437d31297
 
 const BACKEND_URL = "https://nima-backend.vercel.app"; 
+const roomsByFloor = {
+  "5th Floor": ["D501", "D502", "D503", "D504", "D505", "D506", "D507"],
+  "6th Floor": ["D601", "D602"],
+  "7th Floor": ["D701", "D702"],
+  "8th Floor": ["D801", "D802"]
+};
+
+let selectedRoom = null;
 
 /* ---------------- DATE LOGIC ---------------- */
 const bookingDate = document.getElementById("bookingDate");
@@ -76,6 +87,7 @@ async function fetchBookedSlots(date) {
 generateTimeSlots();
 
 /* ---------------- SLOT SELECTION ---------------- */
+<<<<<<< HEAD
 function selectSlot(btn, time) {
     document.querySelectorAll(".slot-btn").forEach(b => b.classList.remove("selected"));
     btn.classList.add("selected");
@@ -83,11 +95,20 @@ function selectSlot(btn, time) {
     
     // Now show rooms, but disable the ones taken for THIS time
     loadRooms(time);
+=======
+function selectSlot(slot) {
+  selectedSlot = slot;
+
+  // frontend-only assumption: all rooms free
+  const allRooms = Object.values(roomsByFloor).flat();
+  renderRooms(allRooms);
+>>>>>>> 39be6ad9c3b52f08b26274a451cd3aa437d31297
 }
 
 /* ---------------- ROOM LOGIC (The Fix) ---------------- */
 const roomGrid = document.getElementById("roomGrid");
 
+<<<<<<< HEAD
 function loadRooms(timeSlot) {
     roomGrid.innerHTML = "";
     selectedRoom = null;
@@ -99,11 +120,25 @@ function loadRooms(timeSlot) {
         .filter(booking => booking.time_slot === timeSlot)
         .map(booking => booking.room_id);
 
-    rooms.forEach(room => {
-        const btn = document.createElement("button");
-        btn.className = "room-btn";
-        btn.innerText = room;
+=======
+function renderRooms(availableRooms) {
+  const grid = document.getElementById("roomGrid");
+  grid.innerHTML = "";
 
+  Object.entries(roomsByFloor).forEach(([floor, rooms]) => {
+    const floorTitle = document.createElement("h5");
+    floorTitle.className = "floor-title";
+    floorTitle.innerText = floor;
+
+    grid.appendChild(floorTitle);
+
+>>>>>>> 39be6ad9c3b52f08b26274a451cd3aa437d31297
+    rooms.forEach(room => {
+      const btn = document.createElement("button");
+      btn.className = "room-btn";
+      btn.innerText = room;
+
+<<<<<<< HEAD
         if (takenRooms.includes(room)) {
             btn.classList.add("room-booked"); // Red & Disabled
             btn.disabled = true;
@@ -113,16 +148,36 @@ function loadRooms(timeSlot) {
         }
         
         roomGrid.appendChild(btn);
+=======
+      if (!availableRooms.includes(room)) {
+        btn.classList.add("booked");
+        btn.disabled = true;
+      } else {
+        btn.onclick = () => selectRoom(room, btn);
+      }
+
+      grid.appendChild(btn);
+>>>>>>> 39be6ad9c3b52f08b26274a451cd3aa437d31297
     });
+  });
 }
 
-function selectRoom(btn, room) {
-    document.querySelectorAll(".room-btn").forEach(b => b.classList.remove("selected"));
-    btn.classList.add("selected");
-    selectedRoom = room;
+function selectRoom(room, btn) {
+  document.querySelectorAll(".room-btn").forEach(b =>
+    b.classList.remove("selected")
+  );
+
+  btn.classList.add("selected");
+  selectedRoom = room;
 }
 
+<<<<<<< HEAD
 /* ---------------- GROUP SIZE LOGIC ---------------- */
+=======
+
+
+/* ---------------- GROUP SIZE LOGIC (Fixed) ---------------- */
+>>>>>>> 39be6ad9c3b52f08b26274a451cd3aa437d31297
 const groupSizeSelect = document.getElementById("groupSize");
 const groupMembersContainer = document.getElementById("groupMembersContainer");
 
@@ -165,19 +220,32 @@ function getGroupMembers() {
     return members;
 }
 
+<<<<<<< HEAD
 /* ---------------- FINAL SUBMIT (Success Page Fix) ---------------- */
 async function bookRoom() {
+=======
+/* ---------------- FINAL SUBMIT ---------------- */
+function bookRoom() {
+>>>>>>> 39be6ad9c3b52f08b26274a451cd3aa437d31297
   if (!selectedSlot || !selectedRoom) {
-    alert("Please select both a time slot and a room.");
+    alert("Please select date, time slot and room");
     return;
   }
 
+<<<<<<< HEAD
   const data = {
+=======
+  const bookingData = {
+>>>>>>> 39be6ad9c3b52f08b26274a451cd3aa437d31297
     leader_name: document.getElementById("leaderName").value,
     leader_roll_no: document.getElementById("rollNo").value,
     email: document.getElementById("email").value,
     contact: document.getElementById("contactNo").value,
+<<<<<<< HEAD
     group_members: getGroupMembers(),
+=======
+    group_members: "Temporary", // you can refine later
+>>>>>>> 39be6ad9c3b52f08b26274a451cd3aa437d31297
     institute: document.getElementById("institute").value,
     department: document.getElementById("department").value,
     program: document.getElementById("programme").value,
@@ -187,6 +255,7 @@ async function bookRoom() {
     time_slot: selectedSlot
   };
 
+<<<<<<< HEAD
   try {
     const res = await fetch(`${BACKEND_URL}/confirm-booking`, {
       method: "POST",
@@ -207,3 +276,11 @@ async function bookRoom() {
     alert("Server error. Please try again.");
   }
 }
+=======
+  // TEMP: store locally for success page
+  localStorage.setItem("bookingData", JSON.stringify(bookingData));
+
+  // ✅ THIS IS THE MISSING PART
+  window.location.href = "/frontend/success.html";
+}
+>>>>>>> 39be6ad9c3b52f08b26274a451cd3aa437d31297
