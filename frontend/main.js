@@ -2,13 +2,11 @@ let selectedSlot = null;
 let selectedRoom = null;
 let currentDayBookings = []; 
 
-// ✅ VERIFY THIS IS YOUR VERCEL BACKEND URL
 const BACKEND_URL = "https://nima-backend.vercel.app"; 
 
-/* ---------------- DATE LOGIC (FIXED) ---------------- */
+/* ---------------- DATE LOGIC ---------------- */
 const bookingDate = document.getElementById("bookingDate");
 
-// Function to get YYYY-MM-DD in Local Time (not UTC)
 function getLocalDateString(date) {
     const offset = date.getTimezoneOffset() * 60000;
     const localDate = new Date(date.getTime() - offset);
@@ -17,14 +15,11 @@ function getLocalDateString(date) {
 
 const today = new Date();
 const maxDate = new Date();
-maxDate.setDate(today.getDate() + 7); // Exactly 7 days from now
+maxDate.setDate(today.getDate() + 7);
 
-// Set the input limits
 bookingDate.min = getLocalDateString(today);
 bookingDate.max = getLocalDateString(maxDate);
-bookingDate.value = bookingDate.min; // Default to today
-
-// Listen for changes
+bookingDate.value = bookingDate.min;
 bookingDate.addEventListener("change", generateTimeSlots);
 
 /* ---------------- TIME SLOT LOGIC ---------------- */
@@ -36,29 +31,24 @@ async function generateTimeSlots() {
     selectedRoom = null;
     document.getElementById("roomGrid").innerHTML = '<p class="subtitle">Select a time slot first</p>';
 
-    // 1. Fetch data from backend
     currentDayBookings = await fetchBookedSlots(bookingDate.value);
     
-    slotGrid.innerHTML = ""; // Clear loading message
+    slotGrid.innerHTML = ""; 
 
     const now = new Date();
-    let startHour = 9; // Library opens at 9 AM
+    let startHour = 9; 
 
-    // Check if user selected Today
     if (bookingDate.value === getLocalDateString(now)) {
-        const currentHour = now.getHours();
-        if (currentHour >= 9) {
-            startHour = currentHour + 1; // Start from next hour
+        if (now.getHours() >= 9) {
+            startHour = now.getHours() + 1;
         }
     }
 
-    // 2. Logic: If it is past 6 PM (18:00), show "Closed" message
     if (startHour >= 18) {
-        slotGrid.innerHTML = '<p style="color: red; font-weight: 500;">Library is closed for today. Please check tomorrow!</p>';
+        slotGrid.innerHTML = '<p style="color: red; font-weight: 500;">Library is closed for today.</p>';
         return;
     }
 
-    // 3. Generate Buttons
     for (let hour = startHour; hour < 18; hour++) {
         const slot = `${hour}:00-${hour + 1}:00`;
         const btn = document.createElement("button");
@@ -66,18 +56,15 @@ async function generateTimeSlots() {
         btn.classList.add("slot-btn");
         btn.classList.add("free"); 
 
-        // Check if ALL 4 rooms are booked
+        // Check if ALL 13 rooms are booked
         const bookingsForThisSlot = currentDayBookings.filter(b => b.time_slot === slot);
-        
-        if (bookingsForThisSlot.length >= 4) {
+        if (bookingsForThisSlot.length >= 13) {
             btn.classList.remove("free");
             btn.classList.add("booked");
             btn.disabled = true;
-            btn.title = "All rooms booked";
         } else {
             btn.onclick = () => selectSlot(btn, slot);
         }
-
         slotGrid.appendChild(btn);
     }
 }
@@ -88,13 +75,11 @@ async function fetchBookedSlots(date) {
         const data = await res.json();
         return data.bookings || []; 
     } catch (err) {
-        console.error("Error fetching slots", err);
-        slotGrid.innerHTML = '<p style="color:red;">Error connecting to server.</p>';
+        console.error(err);
         return [];
     }
 }
 
-// Run once on load
 generateTimeSlots();
 
 /* ---------------- SLOT SELECTION ---------------- */
@@ -105,28 +90,43 @@ function selectSlot(btn, time) {
     loadRooms(time);
 }
 
-/* ---------------- ROOM LOGIC ---------------- */
+/* ---------------- ROOM LOGIC (UPDATED FLOORS) ---------------- */
 const roomGrid = document.getElementById("roomGrid");
 
 function loadRooms(timeSlot) {
     roomGrid.innerHTML = "";
     selectedRoom = null;
 
-    const rooms = ["Room A", "Room B", "Room C", "Room D"];
+    // ✅ NEW ROOM LIST
+    const allRooms = [
+        // Floor 5
+        "501", "502", "503", "504", "505", "506", "507",
+        // Floor 6
+        "601", "602",
+        // Floor 7
+        "701", "702",
+        // Floor 8
+        "801", "802"
+    ];
     
     const takenRooms = currentDayBookings
         .filter(booking => booking.time_slot === timeSlot)
         .map(booking => booking.room_id);
 
-    rooms.forEach(room => {
+    allRooms.forEach(room => {
         const btn = document.createElement("button");
         btn.className = "room-btn";
         btn.innerText = room;
 
+        // Visual separation for floors (Optional tweak)
+        if (room.endsWith("01")) {
+            btn.style.marginLeft = "5px"; 
+        }
+
         if (takenRooms.includes(room)) {
             btn.classList.add("room-booked"); 
             btn.disabled = true;
-            btn.innerText += " (Booked)";
+            btn.title = "Booked";
         } else {
             btn.onclick = () => selectRoom(btn, room);
         }
@@ -148,26 +148,18 @@ const groupMembersContainer = document.getElementById("groupMembersContainer");
 groupSizeSelect.addEventListener("change", () => {
     groupMembersContainer.innerHTML = "";
     const size = parseInt(groupSizeSelect.value);
-
     if (!size || size < 1) return;
 
     for (let i = 1; i <= size; i++) {
-        const memberDiv = document.createElement("div");
-        memberDiv.className = "member-input-block";
-        memberDiv.style.marginTop = "10px"; 
-
-        memberDiv.innerHTML = `
-            <h4 style="font-size: 14px; margin-bottom:5px;">Member ${i}</h4>
-            <div class="input-group">
-                <i class="fa-solid fa-user input-icon"></i>
-                <input type="text" class="member-name" placeholder="Name" required style="margin-bottom: 5px;">
-            </div>
-            <div class="input-group">
-                <i class="fa-solid fa-id-card input-icon"></i>
-                <input type="text" class="member-roll" placeholder="Roll No" required>
-            </div>
+        const div = document.createElement("div");
+        div.className = "member-input-block";
+        div.style.marginTop = "10px"; 
+        div.innerHTML = `
+            <h4 style="font-size:14px; margin-bottom:5px;">Member ${i}</h4>
+            <div class="input-group"><i class="fa-solid fa-user input-icon"></i><input type="text" class="member-name" placeholder="Name" required></div>
+            <div class="input-group"><i class="fa-solid fa-id-card input-icon"></i><input type="text" class="member-roll" placeholder="Roll No" required></div>
         `;
-        groupMembersContainer.appendChild(memberDiv);
+        groupMembersContainer.appendChild(div);
     }
 });
 
@@ -175,11 +167,10 @@ function getGroupMembers() {
     const members = [];
     const nameInputs = document.querySelectorAll('.member-name');
     const rollInputs = document.querySelectorAll('.member-roll');
-
     nameInputs.forEach((input, index) => {
-        const name = input.value.trim();
-        const roll = rollInputs[index] ? rollInputs[index].value.trim() : "";
-        if (name) members.push({ name: name, roll_no: roll });
+        if (input.value.trim()) {
+            members.push({ name: input.value.trim(), roll_no: rollInputs[index]?.value.trim() });
+        }
     });
     return members;
 }
@@ -216,6 +207,8 @@ async function bookRoom() {
     const result = await res.json();
 
     if (result.status === "success") {
+      // ✅ SAVE DATA FOR SUCCESS PAGE
+      localStorage.setItem("bookingReceipt", JSON.stringify(data));
       window.location.href = "success.html";
     } else {
       alert("Error: " + result.message);

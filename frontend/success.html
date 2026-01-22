@@ -1,23 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Booking Confirmed</title>
-  <link rel="stylesheet" href="../style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmed | Nima Library</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .success-card {
+            text-align: center;
+            padding: 40px;
+        }
+        .success-icon {
+            font-size: 60px;
+            color: #27ae60;
+            margin-bottom: 20px;
+        }
+        .receipt-box {
+            background: #f8f9fa;
+            border: 2px dashed #ddd;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+            border-radius: 8px;
+        }
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+        .receipt-label { color: #666; font-weight: 500; }
+        .receipt-val { color: #2c3e50; font-weight: 700; }
+    </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="card">
-    <h2>✅ Booking Confirmed</h2>
-    <div id="bookingDetails"></div>
+<div class="main-wrapper">
+    <div class="container" style="max-width: 500px;">
+        
+        <div class="card success-card">
+            <i class="fa-solid fa-circle-check success-icon"></i>
+            <h2>Booking Confirmed!</h2>
+            <p>Your collaborative space has been reserved.</p>
 
-    <button id="cancelBtn" class="main-btn danger">
-      Cancel Booking
-    </button>
-  </div>
+            <div class="receipt-box">
+                <div class="receipt-row">
+                    <span class="receipt-label">Leader:</span>
+                    <span class="receipt-val" id="dispName">...</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Roll No:</span>
+                    <span class="receipt-val" id="dispRoll">...</span>
+                </div>
+                <hr style="border: 0; border-top: 1px solid #ddd; margin: 10px 0;">
+                <div class="receipt-row">
+                    <span class="receipt-label">Date:</span>
+                    <span class="receipt-val" id="dispDate">...</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Time:</span>
+                    <span class="receipt-val" id="dispTime">...</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Room:</span>
+                    <span class="receipt-val" id="dispRoom" style="color: #2980b9;">...</span>
+                </div>
+            </div>
+
+            <a href="index.html" class="main-btn" style="text-decoration: none; display: inline-block;">
+                <i class="fa-solid fa-house"></i> Back to Home
+            </a>
+            
+            <br><br>
+            <a href="manage.html" style="color: #666; font-size: 13px;">View in Dashboard</a>
+        </div>
+
+    </div>
 </div>
 
-<script src="../success.js"></script>
+<script>
+    // 1. Get Data from Memory
+    const rawData = localStorage.getItem("bookingReceipt");
+
+    if (rawData) {
+        const data = JSON.json(rawData); // Just kidding, JSON.parse
+        const info = JSON.parse(rawData);
+
+        // 2. Fill the receipt
+        document.getElementById("dispName").textContent = info.leader_name;
+        document.getElementById("dispRoll").textContent = info.leader_roll_no;
+        document.getElementById("dispDate").textContent = info.date;
+        document.getElementById("dispTime").textContent = info.time_slot;
+        document.getElementById("dispRoom").textContent = info.room_id;
+    } else {
+        // If no data found, go back home
+        window.location.href = "index.html";
+    }
+</script>
+
 </body>
 </html>
