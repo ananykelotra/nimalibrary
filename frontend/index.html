@@ -4,13 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Discussion Deck | Library Booking</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Style for the new Admin Button */
+        .admin-corner-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            text-decoration: none;
+            color: #c0392b; /* Red color to signify Admin */
+            border: 1px solid #c0392b;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            transition: 0.2s;
+            background: white;
+        }
+        .admin-corner-btn:hover {
+            background: #c0392b;
+            color: white;
+        }
+    </style>
 </head>
+
 <body>
-<div class="main-wrapper">
-<div class="container">
+<div class="main-wrapper" style="position: relative;"> <div class="container">
+
+    <a href="admin.html" class="admin-corner-btn">
+        <i class="fa-solid fa-user-shield"></i> Librarian Login
+    </a>
 
     <div class="header-section">
         <h1><i class="fa-solid fa-book-open-reader"></i> Discussion Deck</h1>
@@ -19,15 +46,18 @@
 
     <div class="card">
         <h3><i class="fa-solid fa-users"></i> Group Details</h3>
+
         <form id="bookingForm">
             <div class="input-group">
                 <i class="fa-solid fa-user-tie input-icon"></i>
                 <input type="text" id="leaderName" placeholder="Leader Name" required>
             </div>
+
             <div class="input-group">
                 <i class="fa-solid fa-id-card input-icon"></i>
                 <input type="text" id="rollNo" placeholder="Roll No (e.g. 21BCE001)" required>
             </div>
+
             <div class="input-group">
                 <i class="fa-solid fa-people-group input-icon"></i>
                 <select id="groupSize" required>
@@ -50,22 +80,27 @@
 
     <div class="card">
         <h3><i class="fa-solid fa-graduation-cap"></i> Academic & Contact Details</h3>
+
         <div class="input-group">
             <i class="fa-solid fa-envelope input-icon"></i>
             <input type="email" id="email" placeholder="Email Address" required>
         </div>
+
         <div class="input-group">
             <i class="fa-solid fa-phone input-icon"></i>
             <input type="tel" id="contactNo" placeholder="Contact Number" required>
         </div>
+
         <div class="input-group">
             <i class="fa-solid fa-building-columns input-icon"></i>
             <input type="text" id="institute" placeholder="Institute (e.g. Nirma University)" required>
         </div>
+
         <div class="input-group">
             <i class="fa-solid fa-code-branch input-icon"></i>
             <input type="text" id="department" placeholder="Department (e.g. CSE)" required>
         </div>
+
         <div class="input-group">
             <i class="fa-solid fa-user-graduate input-icon"></i>
             <input type="text" id="programme" placeholder="Programme (e.g. BTech CSE)" required>
@@ -74,6 +109,7 @@
 
     <div class="card">
         <h3><i class="fa-solid fa-calendar-day"></i> Select Date & Time</h3>
+        
         <div class="input-group">
             <i class="fa-solid fa-calendar-days input-icon"></i>
             <input type="date" id="bookingDate" required>
@@ -117,6 +153,7 @@
 
 </div>
 </div>
+
 <script src="main.js"></script>
 </body>
 </html>
